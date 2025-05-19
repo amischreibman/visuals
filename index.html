@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>תוכנית בדיקות ופונקציונליות בוטים - ויזואלי ואנימטיבי</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f9fafb; /* Tailwind gray-50 */
+        }
+        .accordion-header {
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            user-select: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem; /* p-4 */
+        }
+        .accordion-header:hover {
+            background-color: #f3f4f6; /* Tailwind gray-100, slightly darker hover */
+        }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s cubic-bezier(0.25, 0.1, 0.25, 1), padding 0.5s cubic-bezier(0.25, 0.1, 0.25, 1), opacity 0.4s ease-out 0.1s; /* Smoother cubic-bezier, added opacity transition with delay */
+            padding: 0 1.5rem;
+            opacity: 0; /* Start with content invisible for animation */
+            transform: translateY(-10px); /* Start slightly up for slide-in effect */
+            transition-property: max-height, padding, opacity, transform;
+        }
+        .accordion-content.open {
+            max-height: 2500px; /* Adjust if necessary for very long content */
+            padding: 1.5rem; /* p-6 */
+            opacity: 1; /* Fade in content */
+            transform: translateY(0); /* Slide content to original position */
+        }
+        .bot-section {
+            border: 1px solid #d1d5db; /* Tailwind gray-300 */
+            border-radius: 0.75rem; /* rounded-xl */
+            margin-bottom: 2rem; /* mb-8 */
+            background-color: white;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.07), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* Softer shadow */
+            overflow: hidden; /* To contain rounded corners of title */
+        }
+        .bot-title {
+            color: white;
+            padding: 1.25rem 1.5rem; /* p-5 px-6 */
+            border-top-left-radius: 0.75rem;
+            border-top-right-radius: 0.75rem;
+            display: flex;
+            align-items: center;
+            font-size: 1.5rem; /* text-2xl */
+            font-weight: 600; /* semibold */
+        }
+        .leprechaun-title {
+             background-color: #3b82f6; /* Tailwind blue-500 */
+        }
+        .dragon-title {
+            background-color: #ef4444; /* Tailwind red-500 */
+        }
+        .general-title {
+            background-color: #6b7280; /* Tailwind gray-500 */
+        }
+        .file-list {
+            font-style: italic;
+            padding: 0.75rem 1.5rem; /* p-3 px-6 */
+            background-color: #f3f4f6; /* Tailwind gray-100 */
+            border-bottom: 1px solid #e5e7eb; /* Tailwind gray-200 */
+            font-size: 0.875rem; /* text-sm */
+            color: #4b5563; /* Tailwind gray-600 */
+        }
+        .functionality-group {
+            border: 1px solid #e5e7eb; /* Tailwind gray-200 */
+            border-radius: 0.5rem; /* rounded-lg */
+            margin-bottom: 1rem; /* mb-4 */
+            overflow: hidden;
+        }
+        .functionality-group-header {
+            font-size: 1.125rem; /* text-lg */
+            font-weight: 600; /* semibold */
+        }
+        .leprechaun-bot .functionality-group-header {
+            background-color: #eff6ff; /* Tailwind blue-100 */
+            border-bottom: 1px solid #dbeafe; /* Tailwind blue-200 */
+            color: #1d4ed8; /* Tailwind blue-700 */
+        }
+        .dragon-bot .functionality-group-header {
+            background-color: #fee2e2; /* Tailwind red-100 */
+            border-bottom: 1px solid #fecaca; /* Tailwind red-200 */
+            color: #b91c1c; /* Tailwind red-700 */
+        }
+        .functionality-item {
+            border: 1px solid #e5e7eb; /* Tailwind gray-200 */
+            border-radius: 0.375rem; /* rounded-md */
+            margin-bottom: 0.75rem; /* mb-3 */
+            background-color: #fdfdff; /* Slightly off-white for items */
+        }
+         .functionality-item:last-child {
+            margin-bottom: 0;
+        }
+        .functionality-item-header {
+            font-weight: 500; /* medium */
+            color: #374151; /* Tailwind gray-700 */
+        }
+        .leprechaun-bot .functionality-item-header {
+            background-color: #f0f9ff; /* Tailwind sky-50 */
+        }
+        .dragon-bot .functionality-item-header {
+            background-color: #fff1f2; /* Tailwind rose-50 */
+        }
+        .details-grid {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 0.75rem 1rem; /* gap-3 gap-x-4 */
+            font-size: 0.9rem; /* Slightly larger text in details */
+        }
+        .details-grid dt {
+            font-weight: 600; /* semibold */
+            color: #4b5563; /* Tailwind gray-600 */
+        }
+        .details-grid dd {
+            color: #1f2937; /* Tailwind gray-800 */
+        }
+        .accordion-icon { /* Renamed from .icon for clarity */
+            transition: transform 0.4s cubic-bezier(0.25, 0.1, 0.25, 1); /* Smoother rotation */
+            margin-inline-start: 0.75rem; /* ms-3 */
+        }
+        .accordion-header .accordion-icon.rotate-180 { /* Class for rotated state */
+            transform: rotate(180deg);
+        }
+        code {
+            background-color: #e5e7eb; /* Tailwind gray-200 */
+            padding: 0.15rem 0.4rem;
+            border-radius: 0.25rem; /* rounded-sm */
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.875em;
+            color: #1e293b; /* Tailwind slate-800 */
+            border: 1px solid #d1d5db; /* Tailwind gray-300 */
+        }
+        .general-item {
+            background-color: #f9fafb; /* Tailwind gray-50 */
+            border: 1px solid #e5e7eb; /* Tailwind gray-200 */
+            border-radius: 0.5rem; /* rounded-lg */
+            padding: 1rem; /* p-4 */
+            color: #374151; /* Tailwind gray-700 */
+        }
+        .header-icon {
+            margin-inline-end: 0.75rem; /* me-3, space between icon and text */
+            width: 1.25em; /* Fixed width for alignment */
+            text-align: center;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+    <div class="container mx-auto max-w-5xl">
+        <h1 class="text-4xl font-bold mb-10 text-center text-gray-800 tracking-tight">תוכנית בדיקות ופונקציונליות בוטים</h1>
+
+        <div class="bot-section leprechaun-bot" id="leprechaun-bot">
+            <h2 class="bot-title leprechaun-title">
+                <i class="fas fa-clover fa-fw text-3xl mr-3 ml-1"></i>בוט הלפרקון (Leprechaun Bot)
+            </h2>
+            <p class="file-list">
+                <strong>קבצים עיקריים מעורבים:</strong>
+                <code>leprechaun_handlers.py</code>, <code>leprechaun_logic.py</code>, <code>leprechaun_ai.py</code>, <code>task_scheduler.py</code>, <code>data_storage_function.py</code>, <code>decide_if_accept.py</code>, <code>sheet_reader.py</code>.
+            </p>
+            <div class="p-4 md:p-6 space-y-4">
+                <div class="functionality-group">
+                    <div class="accordion-header functionality-group-header">
+                        <div><i class="fas fa-terminal header-icon"></i>תגובה לפקודות משתמש</div>
+                        <i class="fas fa-angle-down accordion-icon"></i>
+                    </div>
+                    <div class="accordion-content">
+                        <div class="space-y-3">
+                            <div class="functionality-item">
+                                <div class="accordion-header functionality-item-header">
+                                    <div><i class="fas fa-play-circle header-icon text-green-500"></i><code>/start</code></div>
+                                    <i class="fas fa-angle-down accordion-icon"></i>
+                                </div>
+                                <div class="accordion-content"><dl class="details-grid"><dt>טריגר:</dt><dd>פקודת טלגרם</dd><dt>תיאור:</dt><dd>התחלת אינטראקציה, הודעת פתיחה.</dd><dt>בדיקה:</dt><dd>שלח <code>/start</code> לבוט בפרטי. ודא שמתקבלת תגובה מהלפרקון בסגנון שלו.</dd></dl></div>
+                            </div>
+                            <div class="functionality-item">
+                                <div class="accordion-header functionality-item-header">
+                                    <div><i class="fas fa-question-circle header-icon text-blue-500"></i><code>/help</code></div>
+                                    <i class="fas fa-angle-down accordion-icon"></i>
+                                </div>
+                                <div class="accordion-content"><dl class="details-grid"><dt>טריגר:</dt><dd>פקודת טלגרם</dd><dt>תיאור:</dt><dd>הצגת הודעת עזרה עם רשימת פקודות.</dd><dt>בדיקה:</dt><dd>שלח <code>/help</code>. ודא שמתקבלת הודעת פתיחה מה-AI ואז רשימת הפקודות.</dd></dl></div>
+                            </div>
+                            <div class="functionality-item">
+                                <div class="accordion-header functionality-item-header">
+                                    <div><i class="fas fa-language header-icon text-purple-500"></i><code>/language [English/Hebrew]</code></div>
+                                    <i class="fas fa-angle-down accordion-icon"></i>
+                                </div>
+                                <div class="accordion-content"><dl class="details-grid"><dt>טריגר:</dt><dd>פקודת טלגרם</dd><dt>תיאור:</dt><dd>שינוי שפת הממשק.</dd><dt>בדיקה:</dt><dd>שלח <code>/language English</code> ואז <code>/language Hebrew</code>. ודא שהשפה ב-<code>users.json</code> משתנה, ושהתגובות הבאות הן בשפה שנבחרה.</dd></dl></div>
+                            </div>
+                            <div class="functionality-item">
+                                <div class="accordion-header functionality-item-header">
+                                    <div><i class="fas fa-tasks header-icon text-yellow-500"></i><code>/task</code></div>
+                                    <i class="fas fa-angle-down accordion-icon"></i>
+                                </div>
+                                <div class="accordion-content"><dl class="details-grid"><dt>טריגר:</dt><dd>פקודת טלגרם</dd><dt>תיאור:</dt><dd>בקשת משימה יזומה מהמשתמש. (אם שם המשתמש לא ידוע, הבוט ישאל לשם קודם).</dd><dt>בדיקה:</dt><dd><strong>1.</strong> שלח <code>/task</code> כמשתמש חדש (שלא סיפק שם). ודא שהבוט שואל לשם. <strong>2.</strong> ענה עם שם. ודא שהשם נשמר ושאתה מקבל משימה. <strong>3.</strong> שלח <code>/task</code> כמשתמש שכבר יש לו משימה. ודא שהבוט מודיע שיש משימה פעילה. <strong>4.</strong> בדוק את <code>users.json</code> ו-<code>dragon_mood.json</code> לראות שהנתונים עודכנו. <strong>5.</strong> בדוק (בלוגים של ה-scheduler או בפועל) אם תזומנה תזכורת.</dd></dl></div>
+                            </div>
+                            <div class="functionality-item">
+                                <div class="accordion-header functionality-item-header">
+                                    <div><i class="fas fa-check-circle header-icon text-teal-500"></i><code>/complete [fail] [1-100]</code></div>
+                                    <i class="fas fa-angle-down accordion-icon"></i>
+                                </div>
+                                <div class="accordion-content"><dl class="details-grid"><dt>טריגר:</dt><dd>פקודת טלגרם</dd><dt>תיאור:</dt><dd>דיווח על השלמת משימה/שלב או כישלון.</dd><dt>בדיקה:</dt><dd><strong>1.</strong> לאחר קבלת משימת נסיעה ואישורה, שלח <code>/complete</code>. ודא שאתה מקבל את שלב 2. <strong>2.</strong> לאחר קבלת שלב 2 (או משימה יזומה), שלח <code>/complete</code>. ודא שהמשימה מסתיימת. <strong>3.</strong> בכל שלב, שלח <code>/complete fail</code>. ודא שהמשימה מסומנת ככישלון. <strong>4.</strong> בדוק את <code>users.json</code>, <code>missions_output.json</code>, <code>dragon_mood.json</code>.</dd></dl></div>
+                            </div>
+                            <div class="functionality-item">
+                                <div class="accordion-header functionality-item-header">
+                                    <div><i class="fas fa-info-circle header-icon text-indigo-500"></i><code>/details</code></div>
+                                    <i class="fas fa-angle-down accordion-icon"></i>
+                                </div>
+                                <div class="accordion-content"><dl class="details-grid"><dt>טריגר:</dt><dd>פקודת טלגרם</dd><dt>תיאור:</dt><dd>קבלת פרטים על המשימה הפעילה.</dd><dt>בדיקה:</dt><dd>לאחר קבלת משימה, שלח <code>/details</code>. ודא שמוצגים פרטי המשימה.</dd></dl></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="functionality-group">
+                    <div class="accordion-header functionality-group-header">
+                        <div><i class="fas fa-comment-dots header-icon"></i>תגובה להודעות טקסט כלליות (בפרטי)</div>
+                        <i class="fas fa-angle-down accordion-icon"></i>
+                    </div>
+                    <div class="accordion-content">
+                        <div class="space-y-3">
+                           <div class="functionality-item">
+                                <div class="accordion-header functionality-item-header">
+                                    <div><i class="fas fa-user-check header-icon text-blue-500"></i>זיהוי שם</div>
+                                    <i class="fas fa-angle-down accordion-icon"></i>
+                                </div>
+                                <div class="accordion-content"><dl class="details-grid"><dt>טריגר:</dt><dd>הודעת טקסט מהמשתמש בפרטי</dd><dt>תיאור:</dt><dd>אם הבוט שאל לשם, ההודעה הבאה תטופל כשם.</dd><dt>בדיקה:</dt><dd>לאחר שהבוט שאל לשם, שלח הודעה עם שם. ודא שהשם נקלט.</dd></dl></div>
+                            </div>
+                            <div class="functionality-item">
+                                <div class="accordion-header functionality-item-header">
+                                    <div><i class="fas fa-handshake header-icon text-green-500"></i>תגובה להצעת משימה</div>
+                                    <i class="fas fa-angle-down accordion-icon"></i>
+                                </div>
+                                <div class="accordion-content"><dl class="details-grid"><dt>טריגר:</dt><dd>הודעת טקסט מהמשתמש בפרטי (לא פקודה)</dd><dt>תיאור:</dt><dd>שימוש ב-<code>decide_if_accept</code> כדי להבין אם המשתמש מסכים/מסרב/ממשיך לדון.</dd><dt>בדיקה:</dt><dd>לאחר שה-scheduler הציע לך משימה, ענה ב"כן", "בסדר", "לא תודה", "אולי". ודא שהלפרקון מגיב בהתאם והסטטוסים מתעדכנים.</dd></dl></div>
+                            </div>
+                            <div class="functionality-item">
+                                <div class="accordion-header functionality-item-header">
+                                    <div><i class="fas fa-car-side header-icon text-orange-500"></i>תגובה לבדיקה לאחר נסיעה</div>
+                                    <i class="fas fa-angle-down accordion-icon"></i>
+                                </div>
+                                <div class="accordion-content"><dl class="details-grid"><dt>טריגר:</dt><dd>הודעת טקסט מהמשתמש בפרטי</dd><dt>תיאור:</dt><dd>שימוש ב-<code>decide_if_accept</code>. אם "ישליט בקרוב", תזמון תזכורות יומיות. אם "מוותר", כישלון.</dd><dt>בדיקה:</dt><dd>לאחר קבלת הודעת הבדיקה מה-scheduler, ענה בדרכים שונות ובדוק את התגובה והתזמונים.</dd></dl></div>
+                            </div>
+                            <div class="functionality-item">
+                                <div class="accordion-header functionality-item-header">
+                                    <div><i class="fas fa-comments header-icon text-purple-500"></i>תגובה כללית</div>
+                                    <i class="fas fa-angle-down accordion-icon"></i>
+                                </div>
+                                <div class="accordion-content"><dl class="details-grid"><dt>טריגר:</dt><dd>הודעת טקסט מהמשתמש בפרטי</dd><dt>תיאור:</dt><dd>אם אין הקשר ספציפי, ה-AI ייצר תגובה כללית.</dd><dt>בדיקה:</dt><dd>שלח הודעות אקראיות ובדוק את תגובות הלפרקון.</dd></dl></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="functionality-group">
+                    <div class="accordion-header functionality-group-header">
+                        <div><i class="fas fa-stopwatch-20 header-icon"></i>פעולות מתוזמנות</div>
+                        <i class="fas fa-angle-down accordion-icon"></i>
+                    </div>
+                    <div class="accordion-content">
+                        <div class="space-y-3">
+                            <div class="functionality-item">
+                                <div class="accordion-header functionality-item-header">
+                                    <div><i class="fas fa-paper-plane header-icon text-cyan-500"></i>הצעת משימת נסיעה</div>
+                                    <i class="fas fa-angle-down accordion-icon"></i>
+                                </div>
+                                <div class="accordion-content"><dl class="details-grid"><dt>טריגר:</dt><dd>Job: <code>offer_ride_task</code> (רץ כל שעה, מציע בשעה 19:00)</dd><dt>תיאור:</dt><dd>קורא ל-<code>leprechaun_logic.create_and_offer_ride_task_stage1</code>, שולח הצעה למשתמש, מתזמן בדיקת timeout.</dd><dt>בדיקה:</dt><dd><strong>1.</strong> ודא שקובץ <code>data/parsed_rides_schedule.json</code> מכיל נסיעה תקינה למחר עבור משתמש ששמו קיים ב-<code>users.json</code> ואין לו משימה פעילה. <strong>2.</strong> המתן ל-Job שירוץ או הפעל אותו ידנית. <strong>3.</strong> ודא שהמשתמש מקבל את ההצעה בטלגרם בשעה 19:00 (או בזמן שנקבע). <strong>4.</strong> בדוק אם נוצר Job לבדיקת timeout (<code>check_timeout_on_pending_task_offer</code>).</dd></dl></div>
+                            </div>
+                            <div class="functionality-item">
+                                <div class="accordion-header functionality-item-header">
+                                    <div><i class="fas fa-user-clock header-icon text-amber-500"></i>בדיקת התעלמות מהצעה</div>
+                                    <i class="fas fa-angle-down accordion-icon"></i>
+                                </div>
+                                <div class="accordion-content"><dl class="details-grid"><dt>טריגר:</dt><dd>Job: <code>check_timeout_on_pending_task_offer</code> (רץ 24 שעות לאחר ההצעה)</dd><dt>תיאור:</dt><dd>אם המשתמש לא הגיב להצעה תוך 24 שעות, המשימה מסומנת ככישלון.</dd><dt>בדיקה:</dt><dd>לאחר קבלת הצעה, אל תגיב. ודא שלאחר 24 שעות (או שנה את משך הזמן לבדיקה) המשימה נכשלת והנתונים מתעדכנים.</dd></dl></div>
+                            </div>
+                            <div class="functionality-item">
+                                <div class="accordion-header functionality-item-header">
+                                    <div><i class="fas fa-envelope-open-text header-icon text-lime-500"></i>שליחת הודעת בדיקה לאחר נסיעה</div>
+                                    <i class="fas fa-angle-down accordion-icon"></i>
+                                </div>
+                                <div class="accordion-content"><dl class="details-grid"><dt>טריגר:</dt><dd>Job: <code>check_ride_completion_stage1</code> (רץ 30 דקות לאחר זמן סיום הנסיעה המתוכנן)</dd><dt>תיאור:</dt><dd>שולח הודעה למשתמש ששואלת על השלמת שלב 1. מגדיר <code>last_bot_interaction_type</code>.</dd><dt>בדיקה:</dt><dd>לאחר אישור שלב 1 של משימת נסיעה, ודא שה-Job מתוזמן. המתן לזמן סיום הנסיעה + 30 דקות, ודא שההודעה נשלחת.</dd></dl></div>
+                            </div>
+                            <div class="functionality-item">
+                                <div class="accordion-header functionality-item-header">
+                                    <div><i class="fas fa-history header-icon text-pink-500"></i>שליחת תזכורת יומית לשלב משימה</div>
+                                    <i class="fas fa-angle-down accordion-icon"></i>
+                                </div>
+                                <div class="accordion-content"><dl class="details-grid"><dt>טריגר:</dt><dd>Job: <code>remind_daily_task_stage1</code> / <code>remind_daily_task_stage2</code> (רץ כל 24 שעות)</dd><dt>תיאור:</dt><dd>שולח תזכורת אם המשימה עדיין פעילה באותו שלב.</dd><dt>בדיקה:</dt><dd><strong>1.</strong> לאחר שהמשתמש אמר "אשלים בקרוב" לשלב 1, או לאחר שקיבל את שלב 2 (או משימה יזומה), ודא שה-Job מתוזמן. <strong>2.</strong> המתן 24 שעות (או שנה לבדיקה) ודא שהתזכורת מגיעה. <strong>3.</strong> השלם את המשימה ובדוק שהתזכורות נפסקות.</dd></dl></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="functionality-group">
+                    <div class="accordion-header functionality-group-header">
+                        <div><i class="fas fa-users header-icon"></i>תגובה בצ'אט קבוצתי</div>
+                        <i class="fas fa-angle-down accordion-icon"></i>
+                    </div>
+                    <div class="accordion-content">
+                        <div class="space-y-3">
+                            <div class="functionality-item">
+                                <div class="accordion-header functionality-item-header">
+                                    <div><i class="fas fa-user-plus header-icon text-sky-500"></i>בקשת משימה</div>
+                                    <i class="fas fa-angle-down accordion-icon"></i>
+                                </div>
+                                <div class="accordion-content"><dl class="details-grid"><dt>טריגר:</dt><dd>הודעה בקבוצה שמתוייגת לבוט ומכילה בקשת משימה</dd><dt>תיאור:</dt><dd>מפנה לפרטי, שואל לשם בפרטי אם צריך, ואז מקצה משימה.</dd><dt>בדיקה:</dt><dd>שלח בקבוצה "לפרקון תן לי משימה". ודא שהתהליך קורה.</dd></dl></div>
+                            </div>
+                            <div class="functionality-item">
+                                <div class="accordion-header functionality-item-header">
+                                    <div><i class="fas fa-comment-alt header-icon text-gray-500"></i>הודעה כללית</div>
+                                    <i class="fas fa-angle-down accordion-icon"></i>
+                                </div>
+                                <div class="accordion-content"><dl class="details-grid"><dt>טריגר:</dt><dd>הודעה בקבוצה שמתוייגת לבוט</dd><dt>תיאור:</dt><dd>אם לא בקשת משימה, מגיב באופן כללי.</dd><dt>בדיקה:</dt><dd>תייג את הלפרקון בקבוצה עם הודעה כללית.</dd></dl></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bot-section dragon-bot" id="dragon-bot">
+            <h2 class="bot-title dragon-title">
+                <i class="fas fa-dragon fa-fw text-3xl mr-3 ml-1"></i>בוט הדרקון (Dragon Bot)
+            </h2>
+            <p class="file-list">
+                <strong>קבצים עיקריים מעורבים:</strong>
+                <code>dragon_bot_handlers.py</code>, <code>dragon_manager.py</code>, <code>task_scheduler.py</code> (עבור העדכון היומי), <code>data_storage_function.py</code>.
+            </p>
+            <div class="p-4 md:p-6 space-y-4">
+                <div class="functionality-group">
+                    <div class="accordion-header functionality-group-header">
+                        <div><i class="fas fa-cogs header-icon"></i>תגובה לפקודות משתמש</div>
+                        <i class="fas fa-angle-down accordion-icon"></i>
+                    </div>
+                    <div class="accordion-content">
+                        <div class="space-y-3">
+                            <div class="functionality-item">
+                                <div class="accordion-header functionality-item-header">
+                                    <div><i class="fas fa-rocket header-icon text-red-500"></i><code>/start</code></div>
+                                    <i class="fas fa-angle-down accordion-icon"></i>
+                                </div>
+                                <div class="accordion-content"><dl class="details-grid"><dt>טריגר:</dt><dd>פקודת טלגרם</dd><dt>תיאור:</dt><dd>הודעת פתיחה של הדרקון.</dd><dt>בדיקה:</dt><dd>שלח <code>/start</code> לבוט הדרקון בפרטי.</dd></dl></div>
+                            </div>
+                            <div class="functionality-item">
+                                <div class="accordion-header functionality-item-header">
+                                    <div><i class="fas fa-book-open header-icon text-orange-500"></i><code>/help</code></div>
+                                    <i class="fas fa-angle-down accordion-icon"></i>
+                                </div>
+                                <div class="accordion-content"><dl class="details-grid"><dt>טריגר:</dt><dd>פקודת טלגרם</dd><dt>תיאור:</dt><dd>הודעת עזרה על הדרקון ומדדיו.</dd><dt>בדיקה:</dt><dd>שלח <code>/help</code> לבוט הדרקון.</dd></dl></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="functionality-group">
+                    <div class="accordion-header functionality-group-header">
+                        <div><i class="fas fa-heartbeat header-icon"></i>תגובה לשאילתות סטטוס</div>
+                        <i class="fas fa-angle-down accordion-icon"></i>
+                    </div>
+                    <div class="accordion-content">
+                        <div class="space-y-3">
+                            <div class="functionality-item">
+                                <div class="accordion-header functionality-item-header">
+                                    <div><i class="fas fa-lungs header-icon text-pink-500"></i>שאילתת סטטוס</div>
+                                    <i class="fas fa-angle-down accordion-icon"></i>
+                                </div>
+                                <div class="accordion-content"><dl class="details-grid"><dt>טריגר:</dt><dd>הודעת טקסט מהמשתמש בפרטי או בקבוצה, המכילה מילות מפתח (למשל, "מה שלומך דרקון?")</dd><dt>תיאור:</dt><dd>קורא ל-<code>dragon_manager.get_dragon_status_for_query</code> כדי לקבל טקסט סיכום, הייקו עדכני, ונתיב לתמונה. שולח אותם למשתמש.</dd><dt>בדיקה:</dt><dd><strong>1.</strong> שלח לדרקון בפרטי "מה המצב דרקון?". <strong>2.</strong> שלח בקבוצה (שבה הדרקון נמצא) "דרקון, איך אתה מרגיש?". <strong>3.</strong> ודא שאתה מקבל תגובה עם תמונה, הייקו, וסיכום מצב הרוח. <strong>4.</strong> שנה ידנית (או דרך משימות לפרקון) את מדדי הכיף/שיתוף ב-<code>dragon_mood.json</code> ובדוק שהתמונה וההייקו משתנים בהתאם.</dd></dl></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                 <div class="functionality-group">
+                    <div class="accordion-header functionality-group-header">
+                        <div><i class="fas fa-calendar-alt header-icon"></i>עדכון יומי אוטומטי לקבוצה</div>
+                        <i class="fas fa-angle-down accordion-icon"></i>
+                    </div>
+                    <div class="accordion-content">
+                        <div class="space-y-3">
+                            <div class="functionality-item">
+                                <div class="accordion-header functionality-item-header">
+                                    <div><i class="fas fa-bullhorn header-icon text-purple-500"></i>עדכון יומי</div>
+                                    <i class="fas fa-angle-down accordion-icon"></i>
+                                </div>
+                                <div class="accordion-content"><dl class="details-grid"><dt>טריגר:</dt><dd>Job: <code>send_daily_dragon_update</code> (רץ כל יום בשעה 20:00)</dd><dt>תיאור:</dt><dd><code>dragon_manager.prepare_daily_dragon_status_update</code> מכין תמונה חדשה והייקו חדש. ה-Job שולח אותם לקבוצה המוגדרת (<code>TARGET_GROUP_CHAT_ID_FOR_DRAGON_UPDATE</code>).</dd><dt>בדיקה:</dt><dd><strong>1.</strong> ודא ש-<code>TARGET_GROUP_CHAT_ID_FOR_DRAGON_UPDATE</code> מוגדר נכון. <strong>2.</strong> המתן לשעה 20:00 (או שנה את זמן ה-Job לבדיקה). <strong>3.</strong> ודא שההודעה עם התמונה וההייקו נשלחת לקבוצה. <strong>4.</strong> (אופציונלי) בדוק אם תמונת הפרופיל של בוט הדרקון עצמו משתנה (אם מומש).</dd></dl></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="functionality-group">
+                    <div class="accordion-header functionality-group-header">
+                        <div><i class="fas fa-hourglass-half header-icon"></i>דעיכת שיעמום</div>
+                        <i class="fas fa-angle-down accordion-icon"></i>
+                    </div>
+                    <div class="accordion-content">
+                        <div class="space-y-3">
+                            <div class="functionality-item">
+                                <div class="accordion-header functionality-item-header">
+                                    <div><i class="fas fa-battery-quarter header-icon text-yellow-600"></i>דעיכת שיעמום</div>
+                                    <i class="fas fa-angle-down accordion-icon"></i>
+                                </div>
+                                <div class="accordion-content"><dl class="details-grid"><dt>טריגר:</dt><dd>Job: <code>dragon_boredom_decay_job</code> (רץ כל שעה בין 06:00 ל-23:00)</dd><dt>תיאור:</dt><dd>אם לא הייתה פעילות רלוונטית בשעה האחרונה, <code>overall_mood_percentage</code> יורד ב-1%.</dd><dt>בדיקה:</dt><dd><strong>1.</strong> השאר את המערכת ללא פעילות (ללא משימות, ללא שינויים ידניים במצב רוח) למשך יותר משעה בשעות הפעילות. <strong>2.</strong> בדוק את <code>dragon_mood.json</code> או שאל את הדרקון מה שלומו כדי לראות אם מצב הרוח ירד. <strong>3.</strong> בצע פעולה (למשל, השלם משימה) ובדוק שהשיעמום לא מופעל בשעה שלאחר מכן.</dd></dl></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bot-section" id="general-testing">
+             <h2 class="bot-title general-title">
+                <i class="fas fa-clipboard-check fa-fw text-3xl mr-3 ml-1"></i>נקודות כלליות לבדיקה
+            </h2>
+            <div class="p-4 md:p-6">
+                <ul class="list-none space-y-4">
+                    <li class="general-item flex items-center"><i class="fas fa-cogs text-xl text-gray-500 mr-3 ml-1"></i><strong>קובץ <code>config.py</code>:</strong> ודא שכל הטוקנים, ה-API key של גוגל, ו-<code>DRAGON_UPDATE_GROUP_CHAT_ID</code> מוגדרים בו נכון.</li>
+                    <li class="general-item flex items-center"><i class="fab fa-google text-xl text-gray-500 mr-3 ml-1"></i><strong>קובץ <code>google_credentials.json</code>:</strong> ודא שהוא בנתיב הנכון ושהחשבון שירות מורשה לגשת לגיליונות הרלוונטיים.</li>
+                    <li class="general-item flex items-center"><i class="fas fa-bug text-xl text-gray-500 mr-3 ml-1"></i><strong>לוגים (<code>main.log</code>):</strong> עקוב אחרי הלוגים בקונסול ובקבצי הלוג (אם הגדרת כאלה) כדי לראות שגיאות או הודעות חשובות.</li>
+                    <li class="general-item flex items-center"><i class="fas fa-file-code text-xl text-gray-500 mr-3 ml-1"></i><strong>קבצי JSON:</strong> בדוק את התוכן של <code>users.json</code>, <code>dragon_mood.json</code>, <code>missions_output.json</code>, ו-<code>parsed_rides_schedule.json</code> כדי לוודא שהם מתעדכנים כצפוי.</li>
+                    <li class="general-item flex items-center"><i class="fas fa-hat-wizard text-xl text-gray-500 mr-3 ml-1"></i><strong>פרסונה של הלפרקון:</strong> ודא שהתגובות של הלפרקון אכן תואמות לדמות כפי שהוגדרה בפרומפטים ובדוגמאות.</li>
+                    <li class="general-item flex items-center"><i class="fas fa-link text-xl text-gray-500 mr-3 ml-1"></i><strong>אינטראקציה בין בוטים:</strong> בדוק שהשלמת משימה בלפרקון אכן משפיעה על מדד הכיף של הדרקון.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const allAccordionHeaders = document.querySelectorAll('.accordion-header');
+
+            allAccordionHeaders.forEach(header => {
+                header.addEventListener('click', function (event) {
+                    // Prevent click on child icon from re-triggering
+                    if (event.target.closest('.accordion-icon')) {
+                       // Allow the icon itself to be part of the clickable header
+                    }
+
+                    const content = this.nextElementSibling;
+                    const icon = this.querySelector('.accordion-icon'); // Ensure we get the icon from the clicked header
+                    const isOpen = content.classList.contains('open');
+
+                    let parentScopeToSearchForSiblings = null;
+                    let siblingHeaderSelector = '';
+
+                    if (this.classList.contains('functionality-group-header')) {
+                        parentScopeToSearchForSiblings = this.closest('.space-y-4');
+                        siblingHeaderSelector = '.accordion-header.functionality-group-header';
+                    } else if (this.classList.contains('functionality-item-header')) {
+                        parentScopeToSearchForSiblings = this.closest('.space-y-3');
+                        siblingHeaderSelector = '.accordion-header.functionality-item-header';
+                    }
+                    
+                    // Close sibling accordions within the same scope
+                    if (parentScopeToSearchForSiblings && siblingHeaderSelector) {
+                        const siblingHeaders = parentScopeToSearchForSiblings.querySelectorAll(siblingHeaderSelector);
+                        siblingHeaders.forEach(siblingHeader => {
+                            if (siblingHeader !== this) {
+                                const siblingContent = siblingHeader.nextElementSibling;
+                                const siblingIcon = siblingHeader.querySelector('.accordion-icon');
+                                if (siblingContent && siblingContent.classList.contains('open')) {
+                                    siblingContent.classList.remove('open');
+                                    if (siblingIcon) siblingIcon.classList.remove('rotate-180');
+                                }
+                            }
+                        });
+                    }
+
+                    // Toggle the clicked accordion
+                    if (isOpen) {
+                        content.classList.remove('open');
+                        if (icon) icon.classList.remove('rotate-180');
+                    } else {
+                        content.classList.add('open');
+                        if (icon) icon.classList.add('rotate-180');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
